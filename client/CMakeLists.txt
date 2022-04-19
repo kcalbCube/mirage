@@ -40,7 +40,7 @@ endif()
 # Compile and link options
 ################################################################################
 target_compile_options(${PROJECT_NAME} PRIVATE
-	-std=c++2b
+	-std=c++2a
 	-flto
 	-O0
 	-Wall

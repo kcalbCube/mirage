@@ -4,6 +4,8 @@
 #include <core/mirage.h>
 #include <core/signal.h>
 #include <core/logging.h>
+#include <core/ecs.h>
+#include <core/event.h>
 #include <string>
 
 namespace mirage::network::server
@@ -18,10 +20,6 @@ namespace mirage::network::server
 		{
 			return !username.empty();
 		}
-		inline bool operator==(const Connection& connection) const
-		{
-			return &connection == this;
-		}
 	};
 
 	inline Connection invalidConnection;
@@ -29,13 +27,12 @@ namespace mirage::network::server
 	class NetworkController
 	{
 		unsigned short port = 5000;
-		std::vector<Connection> connections;
-		boost::asio::io_context context;	
+		std::vector<Connection> connections;	
 		boost::asio::ip::udp::endpoint endpoint;
 		boost::asio::ip::udp::socket socket;
 		union
 		{
-			Packet<ZERO> packet;
+			PacketVoid packet;
 			uint8_t data[maxPacketSize]{};
 		};
 
@@ -47,9 +44,10 @@ namespace mirage::network::server
 				const AbstractPacket&);
 		void handleReceiveFrom(const boost::system::error_code&, size_t);
 		void startReceive(void);
+
+		bool started = false;
 	public:
 		NetworkController(unsigned short port);
-		
 		unsigned short getPort(void) const;
 
 		const Connection& getConnection(std::string_view username) const;
@@ -61,13 +59,30 @@ namespace mirage::network::server
 		 */
 		void disconnectForce(const Connection&);
 	
-		Signal <void(Connection&)> 				onNewConnection;
-		SignalR<bool(const Connection&), SignalAny<bool, true>>  newConnectionUnavailable;
-		SignalR<bool(const Connection&), SignalAny<bool, true>>  newConnectionBanned;
-		Signal <int(Connection&)> 				onDisconnect;
-		Signal <void(const Connection&, const AbstractPacket&)> handlePacket;
+		entt::sigh<bool(const Connection&)> newConnectionUnavailable;
+		entt::sigh<bool(const Connection&)> newConnectionBanned;	
 
 		void start(void);
 		void send(const Connection&, const boost::asio::const_buffer&);
+	};	
+
+	inline NetworkController& networkController(void)
+	{
+		static NetworkController instance(5000);
+		return instance;
+	}
+
+	struct NewConnectionEvent
+	{
+		std::string username;
+	};
+	struct ConnectionDisconnectEvent
+	{
+		std::string username;
+	};
+	struct PacketReceivedEvent
+	{
+		std::string username;
+		AbstractPacket packet;
 	};
 }

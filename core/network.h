@@ -13,19 +13,29 @@ namespace mirage::network
 	constexpr size_t maxPacketSize = 1024;
 	constexpr size_t usernameMax = 32;
 
-	enum PacketId : uint8_t
+	enum class PacketId : uint8_t
 	{
-		ZERO,
-		TIMEOUT,
+		zero,
+		timeout,
 		/* c->s InitializeConnection
 		 * s->c ConnectionResponce
 		 */
-		CONNECT,
+		connect,
 		/* c->s ClientDisconnect
 		 * s->c ServerDisconnect
 		 */
-		DISCONNECT,
-	};
+		disconnect,
+		/* 
+		 * MessageSent
+		 */
+		message,
+	};	
+}
+template<> struct fmt::formatter<mirage::network::PacketId> 
+	: mirage::utils::EnumFormatter<mirage::network::PacketId> {};
+
+namespace mirage::network
+{
 #pragma pack(push, 1)
 	template<PacketId ID>
 	struct Packet
@@ -34,32 +44,40 @@ namespace mirage::network
 		PacketId id = ID;
 	};
 
-	struct Timeout : Packet<TIMEOUT>
+	using PacketVoid = Packet<PacketId::zero>;
+
+	struct Timeout : Packet<PacketId::timeout>
 	{
 	};
 
-	struct InitializeConnection : Packet<CONNECT>
+	struct InitializeConnection : Packet<PacketId::connect>
 	{
 		char username[usernameMax]{};
 	};
 
-	struct ConnectionResponce : Packet<CONNECT>
+	struct ConnectionResponce : Packet<PacketId::connect>
 	{
 		enum : uint8_t
 		{
-			UNAVAILABLE,
-			BANNED,
-			ALREADY_CONNECTED,
-			CONNECTED,
+			unavailable,
+			banned,
+			alreadyConnected,
+			success,
 		} responce;
 	};
 
-	struct ClientDisconnect : Packet<DISCONNECT>
+	struct ClientDisconnect : Packet<PacketId::disconnect>
 	{
 	};
 
-	struct ServerDisconnect : Packet<DISCONNECT>
+	struct ServerDisconnect : Packet<PacketId::disconnect>
 	{
+	};
+
+	struct MessageSent : Packet<PacketId::message>
+	{
+		static constexpr size_t messageMax = 128;
+		char message[messageMax]{};
 	};
 #pragma pack(pop)
 
@@ -81,24 +99,24 @@ namespace mirage::network
 	// a view to a packet
 	struct AbstractPacket
 	{
-		const Packet<ZERO>* packet = nullptr;
+		const PacketVoid* packet = nullptr;
 		size_t size = 0;
 
 		template<typename T>
-		inline AbstractPacket(T& packet_)
+		AbstractPacket(T& packet_)
 		{
-			packet = reinterpret_cast<const Packet<ZERO>*>(&packet_);
+			packet = reinterpret_cast<const PacketVoid*>(&packet_);
 			size = sizeof(std::decay_t<T>);
 		}
-		inline AbstractPacket(const Packet<ZERO>* const packet_, size_t size_)
+		AbstractPacket(const PacketVoid* const packet_, size_t size_)
 			: packet{packet_}, size{size_} {}
-		AbstractPacket(auto&&) = delete;
+	
+		AbstractPacket(const AbstractPacket& other);
+		AbstractPacket(AbstractPacket&& other) noexcept;
 
-
-		inline operator boost::asio::const_buffer(void) const
-		{
-			return boost::asio::const_buffer(packet, size);
-		}
+		AbstractPacket& operator=(const AbstractPacket& other);	
+		AbstractPacket& operator=(AbstractPacket&& other) noexcept;	
+		operator boost::asio::const_buffer(void) const;	
 	};
 
 	template<typename T>
@@ -108,4 +126,39 @@ namespace mirage::network
 			; // FIXME:
 		return reinterpret_cast<const T&>(*packet.packet);
 	}
+}
+
+inline mirage::network::AbstractPacket::AbstractPacket(
+		const mirage::network::AbstractPacket& other)
+{
+	(*this) = other;
+}
+
+inline mirage::network::AbstractPacket::AbstractPacket(
+		mirage::network::AbstractPacket&& other) noexcept
+{
+	(*this) = other;
+}
+
+inline mirage::network::AbstractPacket::operator boost::asio::const_buffer(void) const
+{
+	return boost::asio::const_buffer(packet, size);
+}
+
+inline mirage::network::AbstractPacket& 
+	mirage::network::AbstractPacket::operator=(const AbstractPacket& other)
+{
+	if(this == &other)
+		return *this;
+	packet = other.packet;
+	size = other.size;
+	return *this;
+}
+
+inline mirage::network::AbstractPacket& 
+	mirage::network::AbstractPacket::operator=(AbstractPacket&& other) noexcept
+{
+	packet = std::move(other.packet);
+	size = other.size;
+	return *this;
 }

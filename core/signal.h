@@ -1,27 +1,35 @@
 #pragma once
 #include <functional>
 #include <algorithm>
-#include <boost/signals2.hpp>
+#include <utility>
+#include <vector>
 
-namespace mirage
+namespace mirage::signal
 {
-	template<typename T, T v>
-	struct SignalAny
+	template<typename T>
+	class VectorCollector
 	{
-		using result_type = bool;
+	public:
+		std::vector<T> contents;
 
-		template<typename IT>
-		inline bool operator()(IT first, IT last) const
+		bool operator()(T v)
 		{
-			while(first != last)
-				if(*(first++) == v)
-					return true;
-			return false;
+			contents.emplace_back(std::move(v));
+			return true;
 		}
 	};
 
-	template<typename T>
-	using Signal = boost::signals2::signal<T>;
-	template<typename T, typename R>
-	using SignalR = boost::signals2::signal<T, R>;
+	template<typename T, typename... Args>
+	bool isAny(auto&& signal, T value, Args&&... args)
+	{
+		bool result = false;
+		signal.collect([&result, &value](auto value1) -> void 
+		{
+			if(value1 == value)
+				result = true;
+		}, args...);
+
+		return result;
+	}
+
 }

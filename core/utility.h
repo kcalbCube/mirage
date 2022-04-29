@@ -4,18 +4,10 @@
 #include <algorithm>
 #include <string>
 #include <boost/range/algorithm_ext/erase.hpp>
-
-#ifndef _DEBUG
-#if defined(_MSC_VER)
-#define UNREACHABLE __assume(0)
-#elif defined(__GNUC__)
-#define UNREACHABLE __builtin_unreachable()
-#else
-#define UNREACHABLE abort()
-#endif
-#else
-#define UNREACHABLE abort()
-#endif
+#include "static.h"
+#include <magic_enum.hpp>
+#include "logging.h"
+#define MIRAGE_COFU(T, name) inline T & name (void) { static T instance; return instance; }
 
 using namespace boost::placeholders;
 namespace mirage::utils
@@ -27,4 +19,17 @@ namespace mirage::utils
 
 	inline auto sanitizeAlnum = boost::bind(sanitize, _1, isalnum);
 	inline auto sanitizeUsername = sanitizeAlnum;
+/*
+ *
+ * @example: template<> struct fmt::formatter<MyEnum> : EnumFormatter<MyEnum> {};
+ */
+	template<typename T>
+	struct EnumFormatter : fmt::formatter<std::string_view>
+	{
+		template<typename FormatContext>
+		auto format(T en, FormatContext& ctx)
+		{
+			return fmt::formatter<std::string_view>::format(magic_enum::enum_name(en), ctx);
+		}
+	};
 }

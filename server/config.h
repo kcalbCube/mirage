@@ -23,5 +23,5 @@ namespace mirage
 		};
 	}
 
-	inline boost::signals2::signal<void(void)> onConfigRead;
+	//inline boost::signals2::signal<void(void)> onConfigRead;
 }

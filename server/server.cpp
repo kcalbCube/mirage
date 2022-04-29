@@ -1,4 +1,5 @@
 #include "server.h"
+#include "core/signal.h"
 #include <ranges>
 #include <algorithm>
 #include <core/utility.h>
@@ -10,10 +11,10 @@ namespace mirage::network::server
 {
 	NetworkController::NetworkController(unsigned short port_)
 		: port{port_}, 
-		  socket(context, 
+		  socket(ioContext(), 
 			boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port))
 	{
-	}
+	}	
 
 	unsigned short NetworkController::getPort(void) const 
 	{ 
@@ -31,7 +32,7 @@ namespace mirage::network::server
 		if(auto&& con = getConnection(username); con.isValid())
 		{
 			logi("{} connection refused: already connected", con.username);
-			ConnectionResponce cr {.responce = ConnectionResponce::ALREADY_CONNECTED};
+			ConnectionResponce cr {.responce = ConnectionResponce::alreadyConnected};
 			send(con, AbstractPacket(cr));
 			return;
 		}
@@ -39,30 +40,31 @@ namespace mirage::network::server
 
 		const auto& ccon = con;
 		ConnectionResponce cr;
-
 		bool shouldErase = false;
-		if(newConnectionUnavailable(ccon))
+
+		if(signal::isAny<bool>(newConnectionUnavailable, true, ccon))	
 		{
 			logi("{} connection refused: unavailable", con.username);
-			cr.responce = ConnectionResponce::UNAVAILABLE;
+
+			cr.responce = ConnectionResponce::unavailable;
 			shouldErase = true;
 		}
-		else if(newConnectionBanned(ccon))
+		else if(signal::isAny<bool>(newConnectionBanned, true, ccon))
 		{
 			logi("{} connection refused: banned", con.username);
-			cr.responce = ConnectionResponce::BANNED;
+			cr.responce = ConnectionResponce::banned;
 			shouldErase = true;
 		}
 		else
 		{
-			logi("{} connected", con.username);
-			cr.responce = ConnectionResponce::CONNECTED;
+			logi("{} connected ({})", con.username, con.endpoint.port());
+			cr.responce = ConnectionResponce::success;
 		}
 
 		if(shouldErase)
 			disconnectForce(ccon);	
 		else
-			onNewConnection(con);
+			event::emitter().publish<NewConnectionEvent>(con.username);
 
 		send(con, AbstractPacket(cr));
 			
@@ -78,7 +80,7 @@ namespace mirage::network::server
 
 		switch(packet.packet->id)
 		{
-			case CONNECT:
+			case PacketId::connect:
 				handleConnect(endpoint, 
 					packetCast<InitializeConnection>(packet));
 				break;
@@ -86,7 +88,8 @@ namespace mirage::network::server
 			{
 				const auto connection = getConnection(endpoint);
 				if(connection.isValid())
-					handlePacket(connection, packet);
+					event::emitter().publish<PacketReceivedEvent>(
+						connection.username, packet);
 			}
 		};
 	}
@@ -107,6 +110,11 @@ namespace mirage::network::server
 				{
 					return &a == &connection;
 				});
+	}
+
+	void NetworkController::disconnect(const Connection& connection)
+	{
+		disconnectForce(connection);
 	}
 
 	const Connection& NetworkController::getConnection(std::string_view username) const
@@ -148,7 +156,6 @@ namespace mirage::network::server
 	void NetworkController::start(void)
 	{
 		startReceive();
-		context.run();
 	}
 
 	void NetworkController::send(

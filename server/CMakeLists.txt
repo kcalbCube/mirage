@@ -2,10 +2,12 @@ set(PROJECT_NAME server)
 ################################################################################
 # Source groups
 ################################################################################
+
 set(Header_Files
 	"config.h"
 	"server.h"
 	"client.h"
+	"game/client.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 

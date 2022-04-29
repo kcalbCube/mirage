@@ -4,13 +4,7 @@ set(CMAKE_SYSTEM_VERSION 10.0 CACHE STRING "" FORCE)
 
 project(Mirage CXX)
 
-set(CMAKE_CXX_COMPILER "/usr/bin/g++")
-
-################################################################################
-# Set target arch type if empty. Visual studio solution generator provides it.
-################################################################################
-message("${CMAKE_GENERATOR_PLATFORM} architecture in use")
-
+set(CXX, "/usr/bin/g++")
 set(ARCH, "x64")
 
 set(CMAKE_THREAD_LIBS_INIT "-lpthread")
@@ -21,7 +15,13 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(UNITY_BUILD 1)
+
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif()
+
 ################################################################################
 # Nuget packages function stub.
 ################################################################################
@@ -35,6 +35,7 @@ include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/include/magic_enum-master/include")
 include_directories("${CMAKE_SOURCE_DIR}/include/boost_1_78_0")
 include_directories("${CMAKE_SOURCE_DIR}/include/fmt/include")
+include_directories("${CMAKE_SOURCE_DIR}/include/entt/src")
 include_directories("${CMAKE_SOURCE_DIR}")
 
 ################################################################################

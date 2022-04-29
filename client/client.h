@@ -8,18 +8,18 @@ namespace mirage::network::client
 	class Client
 	{
 		std::string username;
-		boost::asio::ip::udp::endpoint connected;
-		boost::asio::io_context context;
+		boost::asio::ip::udp::endpoint connected, endpoint;	
 		boost::asio::ip::udp::socket socket;
 		union
 		{
-			Packet<ZERO> packet;
+			PacketVoid packet;
 			uint8_t data[maxPacketSize]{};
 		};
 
 		void handleReceiveFrom(
-				const boost::system::error_code& ec,
-				size_t size);
+				const boost::system::error_code&,
+				size_t);
+		void handlePacketRaw(const AbstractPacket&);
 	public:	
 
 		Client(std::string);
@@ -35,6 +35,11 @@ namespace mirage::network::client
 
 		void startReceive(void);
 		void start(void);
+	};
+
+	struct PacketReceivedEvent
+	{
+		AbstractPacket packet;
 	};
 }
 

@@ -1,18 +1,37 @@
 #include "client.h"
-#include "core/network.h"
+#include <core/network.h>
+#include <core/event.h>
+#include <boost/bind.hpp>
 
 namespace mirage::network::client
 {
+	void Client::handlePacketRaw(const AbstractPacket& packet)
+	{
+		logi("received packet, c {}, id {}", packet.packet->constant, packet.packet->id);
+		if(packet.packet->constant != packetConstant)
+			return;
+		switch(packet.packet->id)
+		{
+			case PacketId::connect:
+				break;
+			default:
+			{
+				event::emitter().publish<PacketReceivedEvent>(packet);
+				break;
+			}
+		}
+	}
 	void Client::handleReceiveFrom(
 			const boost::system::error_code& ec,
 			size_t size)
 	{
-
+		handlePacketRaw(AbstractPacket(&packet, size));
+		startReceive();
 	}
 
 	Client::Client(std::string sv)
 		: username {std::move(sv)}, 
-		  socket(context,
+		  socket(ioContext(),
 			boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0)) {}
 	
 	Client::~Client(void) {}
@@ -34,7 +53,7 @@ namespace mirage::network::client
 	void Client::startReceive(void)
 	{
 		socket.async_receive_from(
-				boost::asio::buffer(data), connected,
+				boost::asio::buffer(data), endpoint,
 				boost::bind(&Client::handleReceiveFrom,
 					this,
 					boost::asio::placeholders::error,
@@ -44,6 +63,5 @@ namespace mirage::network::client
 	void Client::start(void)
 	{
 		startReceive();
-		context.run();
 	}
 }

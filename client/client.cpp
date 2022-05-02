@@ -32,7 +32,7 @@ namespace mirage::network::client
 	Client::Client(std::string sv)
 		: username {std::move(sv)}, 
 		  socket(ioContext(),
-			boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 5001)) {}
+			boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0)) {}
 	
 	Client::~Client(void) {}
 	void Client::connect(boost::asio::ip::udp::endpoint con)

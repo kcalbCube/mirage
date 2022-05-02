@@ -23,6 +23,7 @@ int main(void)
 			}
 		});
 	client.connect(mirage::network::fromString("127.0.0.1", 5000));	
+	
 	mirage::ioContext().run();
 	while(true) ;
 	return 0;

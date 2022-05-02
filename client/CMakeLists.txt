@@ -4,12 +4,15 @@ set(PROJECT_NAME client)
 ################################################################################
 set(Header_Files
 	"client.h"
+	"render/window.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
 set(Source_Files
 	"main.cpp"
 	"client.cpp"
+	"render/window.cpp"
+	"render/imgui_impl.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 
@@ -36,6 +39,8 @@ elseif("${ARCH}" STREQUAL "x86")
     )
 endif()
 
+# Libraries
+target_link_libraries(${PROJECT_NAME} SDL2)
 ################################################################################
 # Compile and link options
 ################################################################################
@@ -51,9 +56,4 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 target_link_options(${PROJECT_NAME} PRIVATE
 	-flto
 )
-
-################################################################################
-# Dependencies
-################################################################################
-target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 

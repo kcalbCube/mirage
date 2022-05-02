@@ -6,8 +6,7 @@
 namespace mirage::network::client
 {
 	void Client::handlePacketRaw(const AbstractPacket& packet)
-	{
-		logi("received packet, c {}, id {}", packet.packet->constant, packet.packet->id);
+	{	
 		if(packet.packet->constant != packetConstant)
 			return;
 		switch(packet.packet->id)

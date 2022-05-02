@@ -4,7 +4,6 @@ set(CMAKE_SYSTEM_VERSION 10.0 CACHE STRING "" FORCE)
 
 project(Mirage CXX)
 
-set(CXX, "/usr/bin/g++")
 set(ARCH, "x64")
 
 set(CMAKE_THREAD_LIBS_INIT "-lpthread")
@@ -36,14 +35,14 @@ include_directories("${CMAKE_SOURCE_DIR}/include/magic_enum-master/include")
 include_directories("${CMAKE_SOURCE_DIR}/include/boost_1_78_0")
 include_directories("${CMAKE_SOURCE_DIR}/include/fmt/include")
 include_directories("${CMAKE_SOURCE_DIR}/include/entt/src")
+include_directories("${CMAKE_SOURCE_DIR}/include/imgui")
 include_directories("${CMAKE_SOURCE_DIR}")
+include_directories("${CMAKE_SOURCE_DIR}/include/SDL/include")
 
 ################################################################################
 # Common utils
 ################################################################################
 include(CMake/Utils.cmake)
-
-set(SDL2_PATH "${CMAKE_SOURCE_DIR}/include/sdl2/include")
 
 add_compile_options("-g")
 
@@ -60,6 +59,9 @@ include(CMake/GlobalSettingsInclude.cmake OPTIONAL)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #add_compile_options (-fcolor-diagnostics)
+
+# SDL
+add_subdirectory("${CMAKE_SOURCE_DIR}/include/SDL")
 
 ################################################################################
 # Sub-projects

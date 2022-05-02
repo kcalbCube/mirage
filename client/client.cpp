@@ -24,7 +24,7 @@ namespace mirage::network::client
 	void Client::handleReceiveFrom(
 			const boost::system::error_code& ec,
 			size_t size)
-	{
+	{	
 		handlePacketRaw(AbstractPacket(&packet, size));
 		startReceive();
 	}
@@ -32,7 +32,7 @@ namespace mirage::network::client
 	Client::Client(std::string sv)
 		: username {std::move(sv)}, 
 		  socket(ioContext(),
-			boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0)) {}
+			boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 5001)) {}
 	
 	Client::~Client(void) {}
 	void Client::connect(boost::asio::ip::udp::endpoint con)

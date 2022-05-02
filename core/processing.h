@@ -12,22 +12,21 @@ namespace mirage::ecs::processing
 	template<typename DeltaType_>
 	class Processor
 	{
-		std::once_flag onceFlag;	
 	public:	
 		using DeltaType = DeltaType_;	
-		entt::scheduler<DeltaType_> scheduler;
-
-		void start(void) {};
-		void stop(void) {};
-
-		void requestStop(void);
+		entt::scheduler<DeltaType_> scheduler;	
+		
 		virtual ~Processor(void);
 	};
 
 	template<unsigned Milliseconds>
 	class PeriodMS : public Processor<unsigned>
 	{
-		PeriodMS(void) = default;
+		PeriodMS(void)
+		{
+			start();
+		}
+
 		std::jthread thread;
 	public:
 
@@ -52,21 +51,7 @@ namespace mirage::ecs
 	struct Processing
 	{
 		template<typename Derived, typename DeltaType>
-		class Process : public entt::process<Process<Derived, DeltaType>, DeltaType>
-		{
-		protected:
-			ComponentWrapper<T> parent;
-		public:
-			Process(entt::entity parent_)
-				: parent{std::move(parent_)} {}
-		};
-
-		template<typename ProcessT, typename DeltaType, typename... Args>
-			requires std::derived_from<ProcessT, Process<ProcessT, DeltaType>>
-		void startProcess(processing::Processor<DeltaType>& processor, Args&&... args)
-		{
-			processor.scheduler.template attach<ProcessT>(entt::to_entity(registry(), *this));
-		}
+		using Process = entt::process<Derived, DeltaType>;	
 
 		template<typename ProcessT, typename DeltaType, typename... Args>
 		void startProcess(processing::Processor<DeltaType>& processor, Args&&... args)
@@ -118,22 +103,15 @@ inline void mirage::ecs::processing::doAfter(
 }
 
 template<typename DeltaType_>
-inline void mirage::ecs::processing::Processor<DeltaType_>::requestStop(void)
-{
-	std::call_once(onceFlag, 
-		boost::bind(&Processor::stop, this));
-}
-template<typename DeltaType_>
 inline mirage::ecs::processing::Processor<DeltaType_>::~Processor(void) 
 {
-	requestStop();
 	scheduler.clear();
 }
 
 template<unsigned Milliseconds>
 inline void mirage::ecs::processing::PeriodMS<Milliseconds>::start(void)
 {
-	thread = std::jthread([*this](std::stop_token itoken) mutable -> void
+	thread = std::jthread([this](std::stop_token itoken) -> void
 	{
 		while(!itoken.stop_requested())
 		{

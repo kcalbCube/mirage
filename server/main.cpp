@@ -16,8 +16,8 @@ int main(void)
 {
 	// readConfig();
 	fmtlog::setLogLevel(fmtlog::DBG);
-	fmtlog::startPollingThread();	
-	mirage::network::server::networkController().start();
+	fmtlog::startPollingThread();		
+	mirage::network::server::networkController().start();	
 	mirage::ioContext().run();
 	for(;;);
 	return mirage::version;

@@ -92,8 +92,9 @@ namespace mirage::ecs
 		ComponentWrapper(entt::entity entity_)
 			: entity{entity_} {}
 		ComponentWrapper(void) = default;
-		ComponentWrapper(ComponentWrapper<T>&&) = delete;
-		ComponentWrapper(const ComponentWrapper<T>&) = delete;
+		ComponentWrapper(const ComponentWrapper<T>&) = default;
+		ComponentWrapper(ComponentWrapper&&) = default;
+		ComponentWrapper<T>& operator=(ComponentWrapper<T>&&) = default;
 		ComponentWrapper& operator=(const entt::entity& other);
 		T* tryGet(void);
 		const T* tryGet(void) const;	
@@ -109,17 +110,22 @@ namespace mirage::ecs
 		{
 			entity = entt::to_entity(registry(), other);
 		}
+		T* operator->(void) { return tryGet(); }
 	};	
 }
 template<typename T>
 inline mirage::ecs::ComponentWrapper<T>& 
        mirage::ecs::ComponentWrapper<T>::operator=(const entt::entity& other)
 {
-	return entity = other;
+	entity = other;
+
+	return *this;
 }
 template<typename T>
 inline T* mirage::ecs::ComponentWrapper<T>::tryGet(void)
 {
+	if(!isValid())
+		return nullptr;
 	return registry().try_get<T>(entity);
 }
 template<typename T>

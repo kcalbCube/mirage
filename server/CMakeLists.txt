@@ -15,6 +15,7 @@ set(Source_Files
 	"main.cpp"
 	"server.cpp"
 	"client.cpp"
+	"game/client.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 

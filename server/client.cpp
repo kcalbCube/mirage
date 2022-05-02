@@ -49,6 +49,8 @@ namespace mirage::server
 		bindEvent<ClientAuthorizationBlockedEvent>  (&Client::authorizationBlocked);
 		bindEvent<ClientAuthorizationConfirmedEvent>(&Client::authorizationConfirmed);
 
+		connection = network::server::networkController().getConnection(event.username);
+
 		event::emitter().publish<ClientAuthorizationRequestEvent>(entity);
 	}
 

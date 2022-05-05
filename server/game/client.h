@@ -1,5 +1,5 @@
 #pragma once
-#include "server/client.h"
+#include <server/client.h>
 #include <core/processing.h>
 
 namespace game
@@ -19,8 +19,9 @@ namespace game
 			int counter = 0;
 			void update(unsigned delta, void*);
 			void failed(void);
-			void succeeded(void);
 		};
+
+		void onPacket(mirage::network::server::PacketReceivedEvent<mirage::network::MessageSent>&);
 
 		void initialize(mirage::server::ClientAuthorizationRequestEvent&);	
 	};

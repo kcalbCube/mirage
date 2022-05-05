@@ -43,7 +43,11 @@ namespace mirage::ecs
 		void bindEvent(auto function)
 		{
 			connectionGuards.push_back(
-				std::make_shared<event::EventConnectionGuard<Event>> (
+				std::make_shared<event::EventConnectionGuard<
+						event::Emitter,
+						Event>> 
+				(
+					event::emitter(),
 					event::emitter().on<Event>(boost::bind(
 						boost::mem_fn(function), static_cast<T*>(this), _1)
 					)
@@ -219,5 +223,7 @@ inline mirage::ecs::Component<T>::~Component(void)
 template<typename T>
 inline void mirage::ecs::Component<T>::destroy(void)
 {
-	mirage::ecs::destroy<T>(entt::to_entity(registry(), *this));
+	if(!registry().valid(entity))
+		return;
+	mirage::ecs::destroy<T>(entity);
 }

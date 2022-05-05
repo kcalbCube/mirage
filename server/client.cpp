@@ -1,7 +1,7 @@
 #include "client.h"
-#include "core/ecs.h"
-#include "core/network.h"
-#include "server/server.h"
+#include <core/ecs.h>
+#include <core/network.h>
+#include "server.h"
 #include <boost/bind.hpp>
 namespace mirage::server
 {

@@ -1,6 +1,5 @@
 #pragma once
 #include <entt/entt.hpp>
-#include "static.h"
 #include "utility.h"
 
 /*
@@ -39,16 +38,18 @@ namespace mirage::event
 	{
 		virtual ~IEventConnectionGuard(void) = default;
 	};
-	template<typename Event>
+	template<typename EmitterT, typename Event>
 	class EventConnectionGuard : public IEventConnectionGuard
 	{
 		Emitter::connection<Event> connection;
+		Emitter& emitter;
 	public:
-		EventConnectionGuard(Emitter::connection<Event> con)
-			: connection { std::move(con) } {}
+		EventConnectionGuard(EmitterT& emitter_, Emitter::connection<Event> con)
+			: connection { std::move(con) }, emitter{emitter_} {}
+
 		virtual ~EventConnectionGuard(void) override
 		{
-			emitter().erase(connection);
+			emitter.erase(connection);
 		}
 	};
 }

@@ -1,6 +1,4 @@
 #include "client.h"
-#include "core/processing.h"
-#include "server/client.h"
 
 void game::ClientAuthorization::AuthorizationProcess::update(unsigned int delta, void*)
 {
@@ -20,24 +18,38 @@ void game::ClientAuthorization::AuthorizationProcess::update(unsigned int delta,
 	}
 }
 
-void game::ClientAuthorization::AuthorizationProcess::succeeded(void)
-{
-	if(auto* client = parent->client.tryGet(); client)
-		client->sendMessage("Authorized!");
-}
-
 void game::ClientAuthorization::AuthorizationProcess::failed(void)
 {
 	if(parent && parent->client)
 	{
-		parent->client.get().sendMessage("Authorization failed!");
+		parent->client->sendMessage("Authorization failed!");
+		parent->destroy();
 	}
 }
 
+void game::ClientAuthorization::onPacket(
+		mirage::network::server::PacketReceivedEvent<mirage::network::MessageSent>& packet)
+{	
+	if(packet.username != client->getUsername())
+		return;
+
+	if(packet.packet.view() == "kcalbCubinho")
+	{
+		client->sendMessage("Authorized!");
+		mirage::event::emitter().publish<mirage::server::ClientAuthorizationConfirmedEvent>
+			(std::string(client->getUsername()));
+		destroy();
+	}
+	else
+		client->sendMessage("Wrong password!");
+}
 void game::ClientAuthorization::initialize( 
 		mirage::server::ClientAuthorizationRequestEvent& request)
 {
-	startProcess<AuthorizationProcess>(mirage::ecs::processing::PeriodMS<1000>::getInstance(), 
+	startProcess<AuthorizationProcess>(
+			mirage::ecs::processing::PeriodMS<1000>::getInstance(), 
 			entity);
+	bindEvent<mirage::network::server::PacketReceivedEvent<mirage::network::MessageSent>>(
+			&ClientAuthorization::onPacket);
 	client = request.client;
 }

@@ -3,27 +3,32 @@
 #include <boost/json.hpp>
 #include <string>
 #include <fstream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
-namespace mirage
+namespace mirage::utils::json
 {
-	inline boost::json::value parseJson(const std::string& filename)
-	{
-		std::ifstream is(filename);
-		if(!is)
-			return nullptr; // TODO: add error
+	inline boost::property_tree::ptree parseFile(std::string_view filename)
+	{	
+		boost::property_tree::ptree tree;
+		boost::property_tree::read_json(filename.data(), tree);
 
-		boost::json::stream_parser p;
-		boost::json::error_code ec;
-		std::string line;
-		while(std::getline(is, line))
-		{
-			p.write(line, ec);
-			if(ec)
-				return nullptr;
-		}
-		p.finish(ec);
-		if(ec)
-			return nullptr;
-		return p.release();
+		return tree;
+	}
+
+	inline boost::property_tree::ptree parseString(const std::string& stringData)
+	{
+		std::stringstream ss{stringData};
+
+		boost::property_tree::ptree tree;
+		boost::property_tree::read_json(ss, tree);
+
+		return tree;
+	}
+
+	template<typename T>
+	inline T readObject(boost::property_tree::ptree ptree)
+	{
+
 	}
 }

@@ -1,12 +1,10 @@
 #pragma once
 
-#include <core/network.h>
 #include <core/mirage.h>
 #include <core/signal.h>
-#include <core/logging.h>
-#include <core/ecs.h>
 #include <core/event.h>
-#include <string>
+#include <core/packet.h>
+#include <boost/asio/buffer.hpp>
 
 namespace mirage::network::server
 {
@@ -46,6 +44,8 @@ namespace mirage::network::server
 		void startReceive(void);
 
 		bool started = false;
+		void handleSend(const boost::system::error_code&,
+				size_t) {}
 	public:
 		NetworkController(unsigned short port);
 		unsigned short getPort(void) const;
@@ -80,9 +80,11 @@ namespace mirage::network::server
 	{
 		std::string username;
 	};
+
+	template<typename T>
 	struct PacketReceivedEvent
 	{
 		std::string username;
-		AbstractPacket packet;
+		const T& packet;
 	};
 }

@@ -1,10 +1,9 @@
 #pragma once
 #include <core/network.h>
-#include <core/mirage.h>
-#include <core/signal.h>
 
 namespace mirage::network::client
 {
+
 	class Client
 	{
 		std::string username;
@@ -37,9 +36,17 @@ namespace mirage::network::client
 		void start(void);
 	};
 
+	template<typename T>
 	struct PacketReceivedEvent
 	{
-		AbstractPacket packet;
+		const T& packet;
 	};
+
+
+	inline Client& client(void)
+	{
+		static Client client("kcalbCube");
+		return client;
+	}
 }
 

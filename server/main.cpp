@@ -7,8 +7,8 @@
 
 void readConfig(void)
 {
-	auto&& jv = mirage::parseJson(mirage::serverConfigFile);
-	mirage::serverConfig = boost::json::value_to<mirage::ServerConfig>(jv);
+	//auto&& jv = mirage::parseJson(mirage::serverConfigFile);
+	//mirage::serverConfig = boost::json::value_to<mirage::ServerConfig>(jv);
 	//mirage::onConfigRead();
 }
 

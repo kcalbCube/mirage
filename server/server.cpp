@@ -1,10 +1,6 @@
 #include "server.h"
-#include "core/signal.h"
 #include <ranges>
-#include <algorithm>
-#include <core/utility.h>
-#include <iostream>
-#include <string_view>
+#include <core/network.h>
 #include <algorithm>
 
 namespace mirage::network::server
@@ -25,9 +21,8 @@ namespace mirage::network::server
 			const boost::asio::ip::udp::endpoint& endpoint,
 			const InitializeConnection& packet)
 	{
-		auto username = mirage::utils::sanitizeUsername(
-				std::string(std::string_view(packet.username, 
-				usernameMax)));
+		auto username = utils::sanitizeUsername(
+				utils::stringView(packet.username, usernameMax));
 
 		if(auto&& con = getConnection(username); con.isValid())
 		{
@@ -77,19 +72,27 @@ namespace mirage::network::server
 		logi("received packet, c {}, id {}", packet.packet->constant, packet.packet->id);
 		if(packet.packet->constant != packetConstant)
 			return;
+		if(packet.packet->id == PacketId::connect)
+		{
+			handleConnect(endpoint,
+					packetCast<InitializeConnection>(packet));
+			return;
+		}
+		const auto connection = getConnection(endpoint);
+		if(!connection.isValid())
+			return;
 
 		switch(packet.packet->id)
 		{
-			case PacketId::connect:
-				handleConnect(endpoint, 
-					packetCast<InitializeConnection>(packet));
-				break;
+			case PacketId::message:
+				event::emitter().publish<PacketReceivedEvent<MessageSent>>(
+						connection.username,
+						packetCast<MessageSent>(packet));
 			default:
 			{
-				const auto connection = getConnection(endpoint);
-				if(connection.isValid())
-					event::emitter().publish<PacketReceivedEvent>(
-						connection.username, packet);
+				event::emitter().publish<PacketReceivedEvent<AbstractPacket>>(
+						connection.username,
+						packet);
 			}
 		};
 	}
@@ -162,6 +165,9 @@ namespace mirage::network::server
 			const Connection& connection,
 			const boost::asio::const_buffer& buffer)
 	{
-		socket.send_to(buffer, connection.endpoint);
+		socket.async_send_to(buffer, connection.endpoint,
+			boost::bind(&NetworkController::handleSend, this,
+				boost::asio::placeholders::error,
+				boost::asio::placeholders::bytes_transferred));
 	}
 }

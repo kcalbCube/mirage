@@ -21,58 +21,28 @@ if(CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif()
 
-################################################################################
-# Nuget packages function stub.
-################################################################################
-function(use_package TARGET PACKAGE VERSION)
-    message(WARNING "No implementation of use_package. Create yours. "
-                    "Package \"${PACKAGE}\" with version \"${VERSION}\" "
-                    "for target \"${TARGET}\" is ignored!")
-endfunction()
-
+include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/include")
-include_directories("${CMAKE_SOURCE_DIR}/include/magic_enum-master/include")
-include_directories("${CMAKE_SOURCE_DIR}/include/boost_1_78_0")
+include_directories("${CMAKE_SOURCE_DIR}/include/magic_enum/include")
 include_directories("${CMAKE_SOURCE_DIR}/include/fmt/include")
 include_directories("${CMAKE_SOURCE_DIR}/include/entt/src")
-include_directories("${CMAKE_SOURCE_DIR}/include/imgui")
-include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${CMAKE_SOURCE_DIR}/include/SDL/include")
+include_directories("${CMAKE_SOURCE_DIR}/include/imgui")
+include_directories("${CMAKE_SOURCE_DIR}/include/boost")
 
-################################################################################
-# Common utils
-################################################################################
 include(CMake/Utils.cmake)
+include(CMake/cotire.cmake)
 
 add_compile_options("-g")
 
-################################################################################
-# Additional Global Settings(add specific info there)
-################################################################################
 include(CMake/GlobalSettingsInclude.cmake OPTIONAL)
 
-if (UNIX AND NOT APPLE)
-  execute_process(COMMAND ${CMAKE_CXX_COMPILER} 
-                  -fuse-ld=gold -Wl,--version 
-                  ERROR_QUIET OUTPUT_VARIABLE ld_version)
-  if ("${ld_version}" MATCHES "GNU gold")
-    message(STATUS "Found Gold linker, use faster linker")
-    set(CMAKE_EXE_LINKER_FLAGS 
-        "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold")
-    set(CMAKE_SHARED_LINKER_FLAGS
-        "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold ")
-  endif()
-endif()
-
-################################################################################
-# Use solution folders feature
-################################################################################
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-#add_compile_options (-fcolor-diagnostics)
-
-# SDL
+# dependencies
 add_subdirectory("${CMAKE_SOURCE_DIR}/include/SDL")
+#cotire(SDL2)
+add_subdirectory("${CMAKE_SOURCE_DIR}/include/boost" EXCLUDE_FROM_ALL)
 
 ################################################################################
 # Sub-projects

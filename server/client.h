@@ -32,8 +32,8 @@ namespace mirage::server
 		network::server::Connection connection;
 		bool authorized = false;
 
-		void authorizationBlocked(const ClientAuthorizationBlockedEvent&);
-		void authorizationConfirmed(const ClientAuthorizationConfirmedEvent&);	
+		void authorizationBlocked(ClientAuthorizationBlockedEvent&);
+		void authorizationConfirmed(ClientAuthorizationConfirmedEvent&);	
 	public:
 		const network::server::Connection& getConnection(void) const;
 		std::string_view getUsername(void) const;
@@ -43,7 +43,8 @@ namespace mirage::server
 		void onDestroy(void);
 		
 		static void staticInitialize(void);
-		void initialize(const network::server::NewConnectionEvent&);
+		void initialize(network::server::NewConnectionEvent&);
+		void lateInitialize(void);
 
 		void sendMessage(std::string_view);
 	};

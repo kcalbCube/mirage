@@ -35,8 +35,8 @@ void game::ClientAuthorization::onPacket(
 
 	if(packet.packet.view() == "kcalbCubinho")
 	{
-		client->sendMessage("Authorized!");
-		mirage::event::emitter().publish<mirage::server::ClientAuthorizationConfirmedEvent>
+		client->sendMessage("Authorized.");	
+		mirage::event::triggerEvent<mirage::server::ClientAuthorizationConfirmedEvent>
 			(std::string(client->getUsername()));
 		destroy();
 	}
@@ -49,7 +49,10 @@ void game::ClientAuthorization::initialize(
 	startProcess<AuthorizationProcess>(
 			mirage::ecs::processing::PeriodMS<1000>::getInstance(), 
 			entity);
-	bindEvent<mirage::network::server::PacketReceivedEvent<mirage::network::MessageSent>>(
-			&ClientAuthorization::onPacket);
 	client = request.client;
+}
+
+void game::ClientAuthorization::lateInitialize(void)
+{
+	bindEvent<mirage::network::server::PacketReceivedEvent<mirage::network::MessageSent>, &ClientAuthorization::onPacket>();
 }

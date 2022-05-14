@@ -29,18 +29,12 @@ set(ALL_FILES
 ################################################################################
 add_executable(${PROJECT_NAME} ${ALL_FILES})
 
+target_link_libraries(${PROJECT_NAME} boost_serialization)
+
+cotire(${PROJECT_NAME})
+
 use_props(${PROJECT_NAME} "${CMAKE_CONFIGURATION_TYPES}" "${DEFAULT_CXX_PROPS}")
 set(ROOT_NAMESPACE server)
-
-if("${ARCH}" STREQUAL "x64")
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
-    )
-elseif("${ARCH}" STREQUAL "x86")
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        INTERPROCEDURAL_OPTIMIZATION_RELEASE "TRUE"
-    )
-endif()
 
 ################################################################################
 # Compile and link options
@@ -50,16 +44,12 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 	-flto
 	-O0
 	-Wall
-	-march=native
+	-Wpedantic
+	-march=native	
 	${DEFAULT_CXX_DEBUG_INFORMATION_FORMAT}
 	${DEFAULT_CXX_EXCEPTION_HANDLING}
 )
 target_link_options(${PROJECT_NAME} PRIVATE
 	-flto
 )
-
-################################################################################
-# Dependencies
-################################################################################
-target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 

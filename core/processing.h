@@ -1,11 +1,8 @@
 #pragma once
-//#include <mutex>
 #include <thread>
-#include "utility.h"
 #include <chrono>
-#include <entt/entt.hpp>
 #include "ecs.h"
-
+#include <iostream>
 namespace mirage::ecs::processing
 {
 	template<typename DeltaType_>
@@ -21,11 +18,7 @@ namespace mirage::ecs::processing
 	template<unsigned Milliseconds>
 	class PeriodMS : public Processor<unsigned>
 	{
-		PeriodMS(void)
-		{
-			start();
-		}
-
+		PeriodMS(void) { start(); }
 		std::jthread thread;
 	public:
 
@@ -41,7 +34,18 @@ namespace mirage::ecs::processing
 	};
 
 	template<unsigned Delim=100>
-	void doAfter(unsigned milliseconds, std::function<void(void)> function);	
+	void doAfter(unsigned milliseconds, std::function<void(void)> function);
+
+	class EventDispatcherProcessing : public ecs::Component<EventDispatcherProcessing>
+	{
+		std::jthread thread;
+	public:
+		void initialize(void);
+
+		void onDestroy(void) { thread.request_stop(); }
+	};
+
+	MIRAGE_CREATE_ON_STARTUP(EventDispatcherProcessing, eventProcessing);
 }
 
 namespace mirage::ecs
@@ -54,10 +58,35 @@ namespace mirage::ecs
 
 		template<typename ProcessT, typename DeltaType, typename... Args>
 		void startProcess(processing::Processor<DeltaType>& processor, Args&&... args)
-		{
+		{	
 			processor.scheduler.template attach<ProcessT>(args...);
 		}
 	};
+}
+
+inline void mirage::ecs::processing::EventDispatcherProcessing::initialize(void)
+{
+	thread = std::jthread([](std::stop_token st) -> void
+	{
+		while(!st.stop_requested())
+		{	
+			event::dispatcher().update();	
+
+			if(!lateQueue().empty())
+			{
+				std::lock_guard lock(lateQueueLock());
+				for(auto&& f : lateQueue())
+					f();
+				lateQueue().clear();
+			}
+
+			
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(40));
+		}
+	});
+
+	thread.detach();
 }
 
 template<unsigned Delim>

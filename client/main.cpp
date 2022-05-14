@@ -13,7 +13,7 @@ struct MessageWindow : mirage::ecs::Component<MessageWindow>
 	std::vector<std::string> messages;
 	char buffer[20]{};
 
-	void windowUpdate(mirage::client::MainWindowUpdateEvent)
+	void windowUpdate(mirage::client::MainWindowUpdateEvent&)
 	{
 		ImGui::Begin("Chat");
 		ImGui::InputText("<", buffer, std::size(buffer));
@@ -32,8 +32,8 @@ struct MessageWindow : mirage::ecs::Component<MessageWindow>
 
 	void initialize(void)
 	{
-		bindEvent<mirage::client::MainWindowUpdateEvent>(&MessageWindow::windowUpdate);
-		bindEvent<PacketReceivedEvent<MessageSent>>(&MessageWindow::onMessage);
+		bindEvent<mirage::client::MainWindowUpdateEvent, &MessageWindow::windowUpdate>();
+		bindEvent<PacketReceivedEvent<MessageSent>, &MessageWindow::onMessage>();
 	}
 
 	void onMessage(PacketReceivedEvent<MessageSent>& packet)
@@ -42,7 +42,8 @@ struct MessageWindow : mirage::ecs::Component<MessageWindow>
 	}
 };
 MIRAGE_CREATE_ON_STARTUP(MessageWindow, msgWindow);
-int main(void)
+#undef main 
+int main(int, char**)
 {
 	fmtlog::setLogLevel(fmtlog::DBG);
  	fmtlog::startPollingThread();		

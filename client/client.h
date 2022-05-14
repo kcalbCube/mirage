@@ -39,7 +39,7 @@ namespace mirage::network::client
 	template<typename T>
 	struct PacketReceivedEvent
 	{
-		const T& packet;
+		T packet;
 	};
 
 

@@ -1,7 +1,9 @@
 #pragma once
-#include <SDL2/SDL.h>
 #include <core/utility.h>
 #include <core/ecs.h>
+
+struct SDL_Window;
+struct SDL_Renderer;
 
 namespace mirage::client
 {

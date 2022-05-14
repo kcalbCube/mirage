@@ -14,12 +14,11 @@ namespace mirage::network::client
 			case PacketId::connect:
 				break;
 			case PacketId::message:
-				event::emitter().publish<PacketReceivedEvent<MessageSent>>
+				event::enqueueEvent<PacketReceivedEvent<MessageSent>>
 					(packetCast<MessageSent>(packet));
 				break;
 			default:
-			{
-				event::emitter().publish<PacketReceivedEvent<AbstractPacket>>(packet);
+			{	
 			
 				break;
 			}

@@ -59,7 +59,7 @@ namespace mirage::network::server
 		if(shouldErase)
 			disconnectForce(ccon);	
 		else
-			event::emitter().publish<NewConnectionEvent>(con.username);
+			event::enqueueEvent<NewConnectionEvent>(con.username);	
 
 		send(con, AbstractPacket(cr));
 			
@@ -85,12 +85,13 @@ namespace mirage::network::server
 		switch(packet.packet->id)
 		{
 			case PacketId::message:
-				event::emitter().publish<PacketReceivedEvent<MessageSent>>(
+				event::enqueueEvent<PacketReceivedEvent<MessageSent>>(
 						connection.username,
 						packetCast<MessageSent>(packet));
+				break;
 			default:
 			{
-				event::emitter().publish<PacketReceivedEvent<AbstractPacket>>(
+				event::enqueueEvent<PacketReceivedEvent<AbstractPacket>>(
 						connection.username,
 						packet);
 			}
@@ -111,7 +112,7 @@ namespace mirage::network::server
 		std::erase_if(connections,
 				[&connection](const auto& a) -> bool
 				{
-					return &a == &connection;
+					return a.username == connection.username;
 				});
 	}
 

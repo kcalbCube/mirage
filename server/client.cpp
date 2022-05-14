@@ -1,6 +1,7 @@
 #include "client.h"
 #include <core/ecs.h>
 #include <core/network.h>
+#include "core/event.h"
 #include "server.h"
 #include <boost/bind.hpp>
 namespace mirage::server
@@ -29,29 +30,33 @@ namespace mirage::server
 		network::server::networkController().disconnect(connection);
 	}
 
-	void Client::authorizationBlocked(const ClientAuthorizationBlockedEvent& event)
+	void Client::authorizationBlocked(ClientAuthorizationBlockedEvent& event)
 	{
 		if(!authorized && event.username == getUsername())
 			destroy();
 	}
 
-	void Client::authorizationConfirmed(const ClientAuthorizationConfirmedEvent& event)
+	void Client::authorizationConfirmed(ClientAuthorizationConfirmedEvent& event)
 	{
 		if(authorized || event.username != getUsername())
 			return;
 
-		authorized = true;
-		event::emitter().publish<ClientAuthorizedEvent>(entity);
+		authorized = true;	
+		event::triggerEvent<ClientAuthorizedEvent>(entity);
 	}
 
-	void Client::initialize(const network::server::NewConnectionEvent& event)
+	void Client::initialize(network::server::NewConnectionEvent& event)
 	{
-		bindEvent<ClientAuthorizationBlockedEvent>  (&Client::authorizationBlocked);
-		bindEvent<ClientAuthorizationConfirmedEvent>(&Client::authorizationConfirmed);
+		connection = network::server::networkController()
+			.getConnection(event.username);
+	
+		event::triggerEvent<ClientAuthorizationRequestEvent>(entity);
+	}
 
-		connection = network::server::networkController().getConnection(event.username);
-
-		event::emitter().publish<ClientAuthorizationRequestEvent>(entity);
+	void Client::lateInitialize(void)
+	{
+		bindEvent<ClientAuthorizationBlockedEvent, &Client::authorizationBlocked>();
+		bindEvent<ClientAuthorizationConfirmedEvent, &Client::authorizationConfirmed>();
 	}
 
 	void Client::sendMessage(std::string_view str)

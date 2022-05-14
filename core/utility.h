@@ -12,7 +12,6 @@
 #define MIRAGE_COFU_CONST(T, name, ...) \
 	inline const T & name (void) { static T instance{ __VA_ARGS__ }; return instance; }
 	
-
 using namespace boost::placeholders;
 namespace mirage::utils
 {

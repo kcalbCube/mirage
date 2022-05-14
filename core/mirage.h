@@ -2,6 +2,7 @@
 #include <cstddef>
 #include "utility.h"
 #include <boost/asio.hpp>
+#include "processing.h"
 
 namespace mirage
 {

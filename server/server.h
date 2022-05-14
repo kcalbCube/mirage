@@ -85,6 +85,6 @@ namespace mirage::network::server
 	struct PacketReceivedEvent
 	{
 		std::string username;
-		const T& packet;
+		T packet;
 	};
 }

@@ -1,11 +1,9 @@
 #include "window.h"
 #include <backends/imgui_impl_sdlrenderer.h>
 #include <backends/imgui_impl_sdl.h>
-#include "core/ecs.h"
-#include "core/mirage.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_video.h>
+#include <core/ecs.h>
+#include <core/mirage.h>
+#include <SDL.h>
 #include <core/logging.h>
 #include <imgui.h>
 
@@ -65,7 +63,7 @@ void mirage::client::MainWindow::render(void)
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 	
-	event::emitter().publish<MainWindowUpdateEvent>();
+	event::triggerEvent<MainWindowUpdateEvent>();
 
 	ImGui::Render();
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);    

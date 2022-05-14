@@ -23,7 +23,8 @@ namespace game
 
 		void onPacket(mirage::network::server::PacketReceivedEvent<mirage::network::MessageSent>&);
 
-		void initialize(mirage::server::ClientAuthorizationRequestEvent&);	
+		void initialize(mirage::server::ClientAuthorizationRequestEvent&);
+		void lateInitialize(void);
 	};
 	MIRAGE_CREATE_WITH_EVENT(
 		mirage::server::ClientAuthorizationRequestEvent, 

@@ -12,7 +12,7 @@ void readConfig(void)
 	//mirage::onConfigRead();
 }
 
-int main(void)
+int main(int, char**)
 {
 	// readConfig();
 	fmtlog::setLogLevel(fmtlog::DBG);

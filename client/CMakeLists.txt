@@ -5,6 +5,7 @@ set(PROJECT_NAME client)
 set(Header_Files
 	"client.h"
 	"render/window.h"
+	"render/render.h"
 )
 source_group("Header Files" FILES ${Header_Files})
 
@@ -12,6 +13,7 @@ set(Source_Files
 	"main.cpp"
 	"client.cpp"
 	"render/window.cpp"
+	"render/render.cpp"
 	"render/imgui_impl.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})

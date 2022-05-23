@@ -1,4 +1,6 @@
 #pragma once
+#include "boost/archive/text_oarchive.hpp"
+#include <sstream>
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS
 #include <boost/bind.hpp>
 #include <algorithm>
@@ -7,6 +9,12 @@
 #include "static.h"
 #include <magic_enum.hpp>
 #include "logging.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/uuid/uuid_serialize.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #define MIRAGE_COFU(T, name, ...) \
 	inline T & name (void) { static T instance{ __VA_ARGS__ }; return instance; }
 #define MIRAGE_COFU_CONST(T, name, ...) \
@@ -39,7 +47,7 @@ namespace mirage::utils
 	};
 
 	/*
-	 * safe stringView to memarray, 
+	 * safe stringView for memarrays.
 	 * returns "" if string invalid, if valid returned 
 	 * string_view size will be equal to strlen(src)
 	 */
@@ -52,11 +60,35 @@ namespace mirage::utils
 		if(!zeroPos)
 			return "";
 
-		const size_t size = static_cast<size_t>(zeroPos - src);
+		const auto size = static_cast<size_t>(zeroPos - src);
 
 		if(!size)
 			return "";
 
 		return std::string_view(src, size);
+	}
+
+	inline std::string serialize(const auto& value)
+	{
+		std::stringstream ss{};
+		boost::archive::text_oarchive archive{ss};
+		
+		archive << value;
+
+		return ss.str();
+	}
+
+	template<typename T>
+	inline T deserialize(const std::string& sv)
+	{
+		std::istringstream ss{sv};	
+
+		boost::archive::text_iarchive archive{ss};
+		
+		T value;
+
+		archive >> value;
+
+		return value;
 	}
 }

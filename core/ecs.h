@@ -48,10 +48,7 @@ namespace mirage::ecs
 		 * expl: this is a stub, used to determine existing of late initializator by invoke_result,
 		 * 	override this with void return value
 		 */
-		std::nullptr_t lateInitialize(void)
-		{ 
-			return nullptr; 
-		}
+		std::nullptr_t lateInitialize(void);
 
 		void onDestroy(void) {}
 

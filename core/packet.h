@@ -1,9 +1,8 @@
-/*
- * forward version of network.h
- */
 #pragma once
 #include <string>
+#include <boost/uuid/uuid.hpp>
 #include "utility.h"
+#include "graphics.h"
 #include <boost/asio/ip/udp.hpp>
 
 namespace mirage::network
@@ -16,11 +15,13 @@ namespace mirage::network
 	{
 		zero,
 		timeout,
-		/* c->s InitializeConnection
+		/* 
+		 * c->s InitializeConnection
 		 * s->c ConnectionResponce
 		 */
 		connect,
-		/* c->s ClientDisconnect
+		/* 
+		 * c->s ClientDisconnect
 		 * s->c ServerDisconnect
 		 */
 		disconnect,
@@ -32,6 +33,15 @@ namespace mirage::network
 		 * s->c ServerInfo
 		 */
 		serverInfo,
+		/*
+		 * s->c GraphicFrame
+		 */
+		graphicFrame,
+		/*
+		 * s->c ResourceUpdate
+		 * c->s ResourceUpdateRequest
+		 */
+		resource
 	};
 
 #pragma pack(push, 1)
@@ -87,6 +97,24 @@ namespace mirage::network
 	{
 		static constexpr size_t infoMax = 512;
 		char info[infoMax]{}; // json
+	};
+
+	struct GraphicFrame : Packet<PacketId::graphicFrame>
+	{
+		using SerializedT = std::vector<graphics::Vertice>;
+		char serialized[256];	
+	};
+
+	struct ResourceUpdate : Packet<PacketId::resource>
+	{	
+		using SerializedT = std::vector<graphics::Resource>;
+		char serialized[256];
+	};
+
+	struct ResourceRequest : Packet<PacketId::resource>
+	{
+		using SerializedT = std::vector<boost::uuids::uuid>;
+		char serialized[256];
 	};
 
 #pragma pack(pop)

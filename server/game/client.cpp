@@ -22,6 +22,9 @@ void game::ClientAuthorization::AuthorizationProcess::failed(void)
 {
 	if(parent && parent->client)
 	{
+		mirage::event::triggerEvent<mirage::server::ClientAuthorizationConfirmedEvent>
+			(std::string(parent->client->getUsername()));
+		return;
 		parent->client->sendMessage("Authorization failed!");
 		parent->destroy();
 	}

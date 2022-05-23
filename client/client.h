@@ -37,7 +37,7 @@ namespace mirage::network::client
 	};
 
 	template<typename T>
-	struct PacketReceivedEvent
+	struct PacketReceivedEvent	
 	{
 		T packet;
 	};

@@ -7,27 +7,28 @@
 
 namespace mirage::server
 {
-	struct ClientAuthorizationRequestEvent
+	struct ClientAuthorizationRequestEvent	
 	{
 		entt::entity client;
 	};
 
-	struct ClientAuthorizationBlockedEvent
+	struct ClientAuthorizationBlockedEvent	
 	{
 		std::string username;
 	};
 
-	struct ClientAuthorizationConfirmedEvent
+	struct ClientAuthorizationConfirmedEvent	
 	{
 		std::string username;
 	};
 
-	struct ClientAuthorizedEvent
+	struct ClientAuthorizedEvent	
 	{
 		entt::entity client;
 	};
 
-	class Client : public mirage::ecs::Component<Client>
+	class Client : 
+		public mirage::ecs::Component<Client>	
 	{
 		network::server::Connection connection;
 		bool authorized = false;

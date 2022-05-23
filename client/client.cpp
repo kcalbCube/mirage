@@ -6,7 +6,8 @@
 namespace mirage::network::client
 {
 	void Client::handlePacketRaw(const AbstractPacket& packet)
-	{	
+	{
+		logi("received packet, c {}, id {}", packet.packet->constant, packet.packet->id);
 		if(packet.packet->constant != packetConstant)
 			return;
 		switch(packet.packet->id)
@@ -16,6 +17,10 @@ namespace mirage::network::client
 			case PacketId::message:
 				event::enqueueEvent<PacketReceivedEvent<MessageSent>>
 					(packetCast<MessageSent>(packet));
+				break;
+			case PacketId::graphicFrame:
+				event::enqueueEvent<PacketReceivedEvent<GraphicFrame>>
+					(packetCast<GraphicFrame>(packet));
 				break;
 			default:
 			{	

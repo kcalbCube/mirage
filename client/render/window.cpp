@@ -59,13 +59,6 @@ void mirage::client::MainWindow::handleEvents(void)
 }
 void mirage::client::MainWindow::render(void)
 {
-	ImGui_ImplSDLRenderer_NewFrame();
-	ImGui_ImplSDL2_NewFrame();
-	ImGui::NewFrame();
-	
-	event::triggerEvent<MainWindowUpdateEvent>();
-
-	ImGui::Render();
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);    
         SDL_SetRenderDrawColor(renderer, 
 		(Uint8)(clear_color.x * 255), 
@@ -73,6 +66,16 @@ void mirage::client::MainWindow::render(void)
 		(Uint8)(clear_color.z * 255), 
 		(Uint8)(clear_color.w * 255));
         SDL_RenderClear(renderer);
+
+	event::triggerEvent<MainWindowRenderEvent>();
+	ImGui_ImplSDLRenderer_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+	ImGui::NewFrame();
+	
+	event::triggerEvent<MainWindowUpdateEvent>();
+
+	ImGui::Render();	
+
         ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(renderer);
 }

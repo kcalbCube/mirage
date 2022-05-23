@@ -6,7 +6,7 @@ namespace game
 {
 	class ClientAuthorization : 
 		public mirage::ecs::Component<ClientAuthorization>,
-		public mirage::ecs::Processing<ClientAuthorization>
+		public mirage::ecs::Processing<ClientAuthorization>	
 	{	
 	public:
 		mirage::ecs::ComponentWrapper<mirage::server::Client> client;

@@ -4,6 +4,7 @@
 #include "config.h"
 #include "server.h"
 #include "client.h"
+#include "game/game.h"
 
 void readConfig(void)
 {
@@ -11,7 +12,7 @@ void readConfig(void)
 	//mirage::serverConfig = boost::json::value_to<mirage::ServerConfig>(jv);
 	//mirage::onConfigRead();
 }
-
+#undef main
 int main(int, char**)
 {
 	// readConfig();

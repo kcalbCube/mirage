@@ -3,6 +3,7 @@
 #include <core/event.h>
 #include <thread>
 #include "render/window.h"
+#include "render/render.h"
 #include <imgui.h>
 
 using namespace mirage::network::client;
@@ -49,9 +50,9 @@ int main(int, char**)
  	fmtlog::startPollingThread();		
 	mirage::network::client::client().start();
 	mirage::network::client::client().connect(mirage::network::fromString("127.0.0.1", 5000));	
-
+	
 	std::thread thr([](void) -> void
-	{
+	{	
 		mirage::client::mainWindow().initialize(600, 300);
 
 		while(true)

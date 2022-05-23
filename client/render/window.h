@@ -26,4 +26,5 @@ namespace mirage::client
 	MIRAGE_COFU(MainWindow, mainWindow);
 
 	struct MainWindowUpdateEvent {};
+	struct MainWindowRenderEvent {};
 }

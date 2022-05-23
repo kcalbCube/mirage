@@ -19,8 +19,8 @@
 #define MIRAGE_CREATE_ON_EVENT(_event_, _T_) \
 	namespace __static__##_T_##_event_{ \
 	MIRAGE_ON_STARTUP(createOnEvent, ( \
-	::mirage::event::dispatcher().sink<_event_>().connect<&::mirage::ecs::_createStub<_T_>>() \
-	))};
+	::mirage::event::dispatcher().sink<_event_>() \
+	.connect<&::mirage::ecs::_createStub<_T_>>()))};
 
 namespace mirage::event
 {

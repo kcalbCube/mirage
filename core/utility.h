@@ -15,10 +15,11 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/uuid/uuid_serialize.hpp>
 #include <boost/uuid/uuid_io.hpp>
+
 #define MIRAGE_COFU(T, name, ...) \
-	inline T & name (void) { static T instance{ __VA_ARGS__ }; return instance; }
-#define MIRAGE_COFU_CONST(T, name, ...) \
-	inline const T & name (void) { static T instance{ __VA_ARGS__ }; return instance; }
+	inline struct _##name##cofu { T instance{ __VA_ARGS__ }; T& operator()(void) { return instance; }; \
+	static bool destructed; ~_##name##cofu(void) { destructed = true; } static bool isDestructed(void) \
+	{ return destructed; } } name; inline bool _##name##cofu::destructed = false
 	
 using namespace boost::placeholders;
 namespace mirage::utils

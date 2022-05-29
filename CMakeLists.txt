@@ -29,6 +29,8 @@ include_directories("${CMAKE_SOURCE_DIR}/include/entt/src")
 include_directories("${CMAKE_SOURCE_DIR}/include/SDL/include")
 include_directories("${CMAKE_SOURCE_DIR}/include/imgui")
 include_directories("${CMAKE_SOURCE_DIR}/include/boost")
+include_directories("${CMAKE_SOURCE_DIR}/include/googletest/googletest/include")
+include_directories("${CMAKE_SOURCE_DIR}/include/googletest/googlemock/include")
 
 include(CMake/Utils.cmake)
 include(CMake/cotire.cmake)
@@ -41,6 +43,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # dependencies
 add_subdirectory("${CMAKE_SOURCE_DIR}/include/SDL")
+add_subdirectory("${CMAKE_SOURCE_DIR}/include/googletest")
 #cotire(SDL2)
 add_subdirectory("${CMAKE_SOURCE_DIR}/include/boost" EXCLUDE_FROM_ALL)
 
@@ -49,3 +52,4 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/include/boost" EXCLUDE_FROM_ALL)
 ################################################################################
 add_subdirectory(server)
 add_subdirectory(client)
+add_subdirectory(test)

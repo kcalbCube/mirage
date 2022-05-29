@@ -15,12 +15,13 @@ namespace mirage::ecs
 	template<typename T>
 	class Component
 	{
-		static std::once_flag onceFlag;
+		static std::once_flag onceFlag, metaOnceFlag;
 		
 	protected:
-		Component(void) = default;
-		Component(auto...) = delete;
+		//Component(void) = default;
+		//Component(auto...) = delete;
 		void initialize(void);
+	
 	public:
 		bool initialized = false;
 
@@ -91,14 +92,13 @@ namespace mirage::ecs
 		template<typename Event>
 		void unbindEvent(void)
 		{	
-			event::dispatcher().disconnect<Event>(static_cast<T*>(this));
+			event::dispatcher().sink<Event>().disconnect(static_cast<T*>(this));
 		}
 
 		template<typename Event>
 		void unbindEventLate(void)
 		{
-			callLate(boost::bind(event::dispatcher().template disconnect<Event>,
-				&event::dispatcher(), static_cast<T*>(this)));
+			callLate(&unbindEvent<Event>);
 		}
 	};	
 
@@ -167,12 +167,20 @@ namespace mirage::ecs
 		}
 
 		T* operator->(void) { return tryGet(); }
+
+		template<typename... Args>
+		static ComponentWrapper<T> create(Args&&... args)
+		{
+			return mirage::ecs::create<T>(args...);
+		}
 	};		
 
 	template<typename T, typename Y>
 	void _createStubArg(Y arg) { create<T>(arg); }
 	template<typename T>
 	void _createStub(void) { create<T>(); }
+
+	void lateQueueUpdate(void);
 }
 template<typename T>
 inline mirage::ecs::ComponentWrapper<T>& 
@@ -286,4 +294,16 @@ inline void mirage::ecs::Component<T>::destroy(void)
 	if(!registry().valid(entity))
 		return;
 	mirage::ecs::destroy<T>(entity);
+}
+
+inline void mirage::ecs::lateQueueUpdate(void)
+{
+	if(lateQueue().empty())
+		return;
+
+	std::lock_guard lock(lateQueueLock());
+	for(auto&& f : lateQueue())
+		f();
+	lateQueue().clear();
+
 }

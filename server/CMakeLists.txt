@@ -29,7 +29,7 @@ set(ALL_FILES
 ################################################################################
 add_executable(${PROJECT_NAME} ${ALL_FILES})
 
-target_link_libraries(${PROJECT_NAME} boost_serialization)
+target_link_libraries(${PROJECT_NAME} SDL2-static SDL2main boost_serialization)
 
 cotire(${PROJECT_NAME})
 
@@ -41,15 +41,14 @@ set(ROOT_NAMESPACE server)
 ################################################################################
 target_compile_options(${PROJECT_NAME} PRIVATE
 	-std=c++2a
-	-flto
 	-O0
 	-Wall
 	-Wpedantic
-	-march=native	
+	-march=native
+	-DSERVERSIDE
 	${DEFAULT_CXX_DEBUG_INFORMATION_FORMAT}
 	${DEFAULT_CXX_EXCEPTION_HANDLING}
 )
 target_link_options(${PROJECT_NAME} PRIVATE
-	-flto
 )
 

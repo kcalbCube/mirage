@@ -39,12 +39,15 @@ namespace mirage::ecs::processing
 	class EventDispatcherProcessing : public ecs::Component<EventDispatcherProcessing>
 	{
 		std::jthread thread;
+		static std::atomic_bool stopped;
 	public:
+		static constexpr auto updatePeriod = 40u;
 		void initialize(void);
 
-		void onDestroy(void) { thread.request_stop(); }
+		void onDestroy(void);
 	};
 
+	inline std::atomic_bool EventDispatcherProcessing::stopped{false};
 	MIRAGE_CREATE_ON_STARTUP(EventDispatcherProcessing, eventProcessing);
 }
 
@@ -71,22 +74,19 @@ inline void mirage::ecs::processing::EventDispatcherProcessing::initialize(void)
 		while(!st.stop_requested())
 		{	
 			event::dispatcher().update();	
-
-			if(!lateQueue().empty())
-			{
-				std::lock_guard lock(lateQueueLock());
-				for(auto&& f : lateQueue())
-					f();
-				lateQueue().clear();
-			}
-
-			
-
-			std::this_thread::sleep_for(std::chrono::milliseconds(40));
+			lateQueueUpdate();	
+			std::this_thread::sleep_for(std::chrono::milliseconds(updatePeriod));
 		}
+		stopped.store(true);
 	});
 
 	thread.detach();
+}
+
+inline void mirage::ecs::processing::EventDispatcherProcessing::onDestroy()
+{
+	thread.request_stop();
+	stopped.wait(false);
 }
 
 template<unsigned Delim>

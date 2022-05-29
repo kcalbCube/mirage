@@ -22,3 +22,6 @@
 [submodule "include/imgui"]
 	path = include/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "include/googletest"]
+	path = include/googletest
+	url = https://github.com/google/googletest
